@@ -1,9 +1,9 @@
 
-# FPL Bot
+# FPL Moneyball
 
 The ultimate aim of this project is to create a program that will pick the best fanatasy premier league team each week to acheive the maximum points possible.
 
-I've broken down the core quesitons below which I aim to program answers for individually before combining there code together (links to repo included):
+I've broken down the core quesitons below which I aim to program answers for individually before combining there code together:
 
 #### Captain
 - Which player should I captain (player gets double points that week)?
