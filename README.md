@@ -16,4 +16,4 @@ I've broken down the core quesitons below which I aim to program answers for ind
 - Which is the best combination of players that can be bought within the budget?
 
 #### Chip Management
-- When is it best to use the lifeline cards (Wildcard, Freehit, Bench Boost & Triple Captain)
+- When is it best to use the lifeline chips (Wildcard, Freehit, Bench Boost & Triple Captain)
