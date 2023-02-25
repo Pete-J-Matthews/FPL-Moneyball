@@ -1,28 +1,55 @@
 import requests
 import mysql.connector
 
-# Connect to MySQL database
-db_connection = mysql.connector.connect(
+# Establish a connection to the MySQL database
+mydb = mysql.connector.connect(
   host="fpldb.c2nundnlfyfy.eu-west-2.rds.amazonaws.com",
   user="fplusername",
   password="fplpassword",
   database="fpldb"
 )
 
-# Make a request to FPL API
-url = "https://fantasy.premierleague.com/api/bootstrap-static/"
-response = requests.get(url)
+# Create a cursor object
+mycursor = mydb.cursor()
 
-# Convert JSON to dictionary
-data = response.json()
+# Call the FPL players API
+players_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
+players_response = requests.get(players_url)
+players_data = players_response.json()
 
-# Insert data into MySQL database
-for player in data["elements"]:
-    query = "INSERT INTO players (id, name, team_id) VALUES (%s, %s, %s)"
-    values = (player["id"], player["first_name"] + " " + player["second_name"], player["team"])
-    cursor = db_connection.cursor()
-    cursor.execute(query, values)
-    db_connection.commit()
+# Iterate over the player data and insert into MySQL
+for player in players_data['elements']:
+    id = player['id']
+    name = player['first_name'] + ' ' + player['second_name']
+    team = player['team']
+    position = player['element_type']
+    value = player['now_cost'] / 10.0
+
+    sql = "INSERT INTO players (id, name, team, position, value) VALUES (%s, %s, %s, %s, %s)"
+    val = (id, name, team, position, value)
+    mycursor.execute(sql, val)
+
+mydb.commit()
+
+# Call the FPL fixtures API
+fixtures_url = "https://fantasy.premierleague.com/api/fixtures/"
+fixtures_response = requests.get(fixtures_url)
+fixtures_data = fixtures_response.json()
+
+# Iterate over the fixtures data and insert into MySQL
+for fixture in fixtures_data:
+    fixture_id = fixture['id']
+    event = fixture['event']
+    home_team = fixture['team_h']
+    away_team = fixture['team_a']
+    home_score = fixture['team_h_score']
+    away_score = fixture['team_a_score']
+
+    sql = "INSERT INTO fixtures (fixture_id, event, home_team, away_team, home_score, away_score) VALUES (%s, %s, %s, %s, %s, %s)"
+    val = (fixture_id, event, home_team, away_team, home_score, away_score)
+    mycursor.execute(sql, val)
+
+mydb.commit()
 
 # Close the database connection
-db_connection.close()
+mydb.close()
