@@ -14,9 +14,20 @@ CREATE TABLE IF NOT EXISTS players (
 
 CREATE TABLE IF NOT EXISTS fixtures (
   fixture_id INT PRIMARY KEY,
-  event INT,
+  gameweek INT,
   home_team INT,
   away_team INT,
-  team_h_difficulty INT,
-  team_a_difficulty INT
+  home_difficulty INT,
+  away_difficulty INT
+);
+
+-- Table for my team players
+CREATE TABLE IF NOT EXISTS my_team (
+  id INT PRIMARY KEY,
+  name VARCHAR(255),
+  team INT,
+  position INT,
+  form FLOAT,
+  value FLOAT,
+  is_captain BOOLEAN
 );

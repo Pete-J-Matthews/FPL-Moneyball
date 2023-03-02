@@ -1,6 +1,7 @@
 import requests
 import mysql.connector
 
+
 # Establish a connection to the MySQL database
 mydb = mysql.connector.connect(
   host="fpldb.c2nundnlfyfy.eu-west-2.rds.amazonaws.com",
@@ -46,41 +47,45 @@ for player in players_data['elements']:
 mydb.commit()
 
 # Call the FPL fixtures API
-fixtures_url = "https://fantasy.premierleague.com/api/fixtures?future=1)/"
+fixtures_url = "https://fantasy.premierleague.com/api/fixtures/?future=1"
 fixtures_response = requests.get(fixtures_url)
 fixtures_data = fixtures_response.json()
 
 # Iterate over the fixtures data and insert into MySQL
 for fixture in fixtures_data:
     fixture_id = fixture['id']
-    event = fixture['event']
+    gameweek = fixture['event']
     home_team = fixture['team_h']
     away_team = fixture['team_a']
-    team_h_difficulty = fixture['team_h_difficulty']
-    team_a_difficulty = fixture['team_a_difficulty']
+    home_difficulty = fixture['team_h_difficulty']
+    away_difficulty = fixture['team_a_difficulty']
 
-    sql = "INSERT INTO fixtures (fixture_id, event, home_team, away_team, team_h_difficulty, team_a_difficulty) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-    val = (fixture_id, event, home_team, away_team, team_h_difficulty, team_a_difficulty)
-    mycursor.execute(sql, val)
+    sql = "INSERT INTO fixtures (fixture_id, gameweek, home_team, away_team, home_difficulty, away_difficulty) VALUES (%s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE gameweek=VALUES(gameweek), home_team=VALUES(home_team), away_team=VALUES(away_team), home_difficulty=VALUES(home_difficulty), away_difficulty=VALUES(away_difficulty)"
+    mycursor.execute(sql, (fixture_id, gameweek, home_team, away_team, home_difficulty, away_difficulty))
+    mydb.commit()
 
-mydb.commit()
-
-# Call the FPL my team API
-manager_id = 5538943  # This my ID as a placeholder but will become a variable thats updated by a frontend input from the user.
-my_team_url = f"https://fantasy.premierleague.com/api/my-team/{manager_id}/"
-my_team_response = requests.get(my_team_url)
-my_team_data = my_team_response.json()
-
-# Iterate over the player data in my team and update the "selected_by" column in the players table
-for player in my_team_data["picks"]:
-    player_id = player['element']
-    selected_by_percent = player['selected_by_percent']
-
-    sql = "UPDATE players SET selected_by = %s WHERE id = %s"
-    val = (selected_by_percent, player_id)
-    mycursor.execute(sql, val)
 
 mydb.commit()
 
-# Close the database connection
-mydb.close()
+# Replace with your email and password
+email = 'pete.j.matt@gmail.com'
+password = 'FPLpassword123!'
+
+session = requests.session()
+
+# Log in to the Fantasy Premier League website to obtain a session cookie
+login_url = "https://users.premierleague.com/accounts/login/"
+data = {
+    "login": email,
+    "password": password,
+    "app": "plfpl-web",
+    "redirect_uri": "https://fantasy.premierleague.com/",
+}
+with requests.Session() as session:
+    session.post(login_url, data=data, headers={"User-Agent": "Dalvik"})
+
+    manager_id = 5538943
+    my_team_url = f"https://fantasy.premierleague.com/api/my-team/{manager_id}/"
+    my_team_data = session.get(my_team_url)
+    print(my_team_data.headers)
+    print(my_team_data.text)
