@@ -2,6 +2,14 @@ CREATE DATABASE IF NOT EXISTS fpldb;
 
 USE fpldb;
 
+CREATE TABLE IF NOT EXISTS users (
+  user_id INT PRIMARY KEY,
+  username VARCHAR(255),
+  team_name VARCHAR(255),
+  rank INT
+);
+
+
 CREATE TABLE IF NOT EXISTS players (
   id INT PRIMARY KEY,
   name VARCHAR(255),
@@ -40,6 +48,11 @@ CREATE TABLE IF NOT EXISTS user_team (
     captain BOOLEAN NOT NULL,
     vice_captain BOOLEAN NOT NULL
 );
+
+-- Sort the users table by team name
+SELECT user_id, username, team_name, rank
+FROM users
+ORDER BY team_name DESC;
 
 -- Sort the players table by fixture difficulty ascending, home/away descending, form descending, and value descending
 SELECT *
